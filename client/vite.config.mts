@@ -1,11 +1,13 @@
 import react from "@vitejs/plugin-react"
 import { fileURLToPath, URL } from "url"
 import { defineConfig } from "vite"
+import path from "path"
 
-// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [react()],
     build: {
+        outDir: path.resolve(__dirname, "../server/public"), // 👈 Output build to server/public
+        emptyOutDir: true,
         chunkSizeWarningLimit: 1600,
         rollupOptions: {
             output: {
@@ -30,9 +32,9 @@ export default defineConfig({
         ],
     },
     preview: {
-        port: 5173
+        port: 5173,
     },
-    server:{
+    server: {
         open: true,
-    }
+    },
 })

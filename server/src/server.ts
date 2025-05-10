@@ -11,6 +11,7 @@ dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(express.json());
 app.use(cors());
 
@@ -20,14 +21,16 @@ app.use(express.static(path.join(__dirname, "public")));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", // Allow all origins (adjust as needed)
   },
-  maxHttpBufferSize: 1e8,
-  pingTimeout: 60000,
+  maxHttpBufferSize: 1e8, // Adjust max HTTP buffer size if necessary
+  pingTimeout: 60000, // Adjust ping timeout as needed
 });
 
+// User socket mapping
 let userSocketMap: User[] = [];
 
+// Utility functions
 function getUsersInRoom(roomId: string): User[] {
   return userSocketMap.filter((user) => user.roomId === roomId);
 }
@@ -50,6 +53,7 @@ function getUserBySocketId(socketId: SocketId): User | null {
   return user;
 }
 
+// Socket.IO connections and event handling
 io.on("connection", (socket) => {
   socket.on(SocketEvent.JOIN_REQUEST, ({ roomId, username }) => {
     const isUsernameExist = getUsersInRoom(roomId).filter((u) => u.username === username);
@@ -83,6 +87,7 @@ io.on("connection", (socket) => {
     socket.leave(roomId);
   });
 
+  // Additional socket events...
   socket.on(SocketEvent.SYNC_FILE_STRUCTURE, ({ fileStructure, openFiles, activeFile, socketId }) => {
     io.to(socketId).emit(SocketEvent.SYNC_FILE_STRUCTURE, {
       fileStructure,
@@ -232,13 +237,13 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-
 // Catch-all: Serve index.html for all unknown routes (React SPA support)
 app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+  console.log(`Server is listening on port ${PORT}`);
 });
